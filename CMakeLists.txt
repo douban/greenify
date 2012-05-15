@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.6)
+project(libgreenify)
+add_library(greenify SHARED libgreenify.c)
+install(TARGETS greenify DESTINATION lib)
+install(FILES libgreenify.h DESTINATION include)

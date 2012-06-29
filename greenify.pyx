@@ -7,8 +7,9 @@ cdef extern from "libgreenify.h":
 from gevent.hub import get_hub
 from gevent.timeout import Timeout
 
-cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout) with gil:
+cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
     cdef int fd, event
+    cdef float timeout_in_s
 
     assert nwatchers == 1
 
@@ -17,8 +18,9 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout) wit
     event = watchers[0].events;
     watcher = hub.loop.io(fd, event)
 
-    if timeout != 0:
-        t = Timeout.start_new(timeout)
+    if timeout_in_ms != 0:
+        timeout_in_s = timeout_in_ms / 1000.0
+        t = Timeout.start_new(timeout_in_s)
         try:
             hub.wait(watcher)
             return 0

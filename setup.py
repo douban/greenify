@@ -1,15 +1,13 @@
 import os
-from setuptools import setup, Extension
+from distutils.core import setup, Extension
 from Cython.Distutils import build_ext
 
-include_dirs = ['.']
-library_dirs = ['.']
-
 if 'LIBGREENIFY_PREFIX' in os.environ:
-    include_dirs.append(os.path.join(os.environ['LIBGREENIFY_PREFIX'],
-                                     'include'))
-    library_dirs.append(os.path.join(os.environ['LIBGREENIFY_PREFIX'], 'lib'))
-
+    include_dirs = [os.path.join(os.environ['LIBGREENIFY_PREFIX'], 'include')]
+    library_dirs = [os.path.join(os.environ['LIBGREENIFY_PREFIX'], 'lib')]
+else:
+    include_dirs = ['.']
+    library_dirs = ['.']
 
 setup(name='greenify',
       version='0.1',

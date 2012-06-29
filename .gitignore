@@ -3,3 +3,4 @@ CMakeFiles/
 Makefile
 cmake_install.cmake
 *.dylib
+greenify.c

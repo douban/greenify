@@ -1,6 +1,7 @@
 cdef extern from "libgreenify.h":
-    cdef struct greenify_watcher:
-        pass
+    struct greenify_watcher:
+        int fd
+        int events
     ctypedef int (*greenify_wait_callback_func_t) (greenify_watcher* watchers, int nwatchers, int timeout)
     cdef void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 

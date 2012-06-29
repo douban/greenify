@@ -37,15 +37,17 @@ void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 	g_wait_callback = callback;
 }
 
-int callback_single_watcher(int fd, int events)
+int callback_single_watcher(int fd, int events, int timeout)
 {
 	struct greenify_watcher watchers[1];
+	int retval;
 
 	assert(g_wait_callback != NULL);
 
 	watchers[0].fd = fd;
 	watchers[0].events = events;
-	return g_wait_callback(watchers, 1, -1);
+	retval = g_wait_callback(watchers, 1, timeout);
+	return retval;
 }
 
 int
@@ -54,14 +56,19 @@ green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 	int flags_changed, flags, s_err;
 	ssize_t retval;
 
-	if (g_wait_callback == NULL || !set_nonblock(socket, &flags))
-		return connect(socket, address, address_len);
+/*        printf("green_connect\n");*/
 
-	do {
-		retval = connect(socket, address, address_len);
-		s_err = errno;
-	} while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EALREADY || s_err == EINPROGRESS)
-			&& !(retval = callback_single_watcher(socket, EVENT_READ)));
+	if (g_wait_callback == NULL || !set_nonblock(socket, &flags)) {
+		return connect(socket, address, address_len);
+	}
+
+	retval = connect(socket, address, address_len);
+	s_err = errno;
+	if (retval < 0 && (s_err == EWOULDBLOCK || s_err == EALREADY || s_err == EINPROGRESS)) {
+		callback_single_watcher(socket, EVENT_READ, 0);
+		getsockopt(socket, SOL_SOCKET, SO_ERROR, &s_err, &address_len);
+		retval = s_err ? -1 : 0;
+	}
 
 	restore_flags(socket, flags);
 	errno = s_err;
@@ -81,7 +88,7 @@ green_read(int fildes, void *buf, size_t nbyte)
 		retval = read(fildes, buf, nbyte);
 		s_err = errno;
 	} while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-			&& !(retval = callback_single_watcher(fildes, EVENT_READ)));
+			&& !(retval = callback_single_watcher(fildes, EVENT_READ, 0)));
 
 	restore_flags(fildes, flags);
 	errno = s_err;
@@ -94,6 +101,8 @@ green_write(int fildes, const void *buf, size_t nbyte)
 	int flags, flags_changed, s_err;
 	ssize_t retval;
 
+/*        printf("green_write\n");*/
+
 	if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
 		return write(fildes, buf, nbyte);
 
@@ -101,7 +110,7 @@ green_write(int fildes, const void *buf, size_t nbyte)
 		retval = write(fildes, buf, nbyte);
 		s_err = errno;
 	} while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-			&& !(retval = callback_single_watcher(fildes, EVENT_WRITE)));
+			&& !(retval = callback_single_watcher(fildes, EVENT_WRITE, 0)));
 
 	restore_flags(fildes, flags);
 	errno = s_err;
@@ -121,7 +130,7 @@ green_recv(int socket, void *buffer, size_t length, int flags)
 		retval = recv(socket, buffer, length, flags);
 		s_err = errno;
 	} while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-			&& !(retval = callback_single_watcher(socket, EVENT_READ)));
+			&& !(retval = callback_single_watcher(socket, EVENT_READ, 0)));
 
 	restore_flags(socket, sock_flags);
 	errno = s_err;
@@ -141,7 +150,7 @@ green_send(int socket, const void *buffer, size_t length, int flags)
 		retval = send(socket, buffer, length, flags);
 		s_err = errno;
 	} while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-			&& !(retval = callback_single_watcher(socket, EVENT_WRITE)));
+			&& !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
 
 	restore_flags(socket, sock_flags);
 	errno = s_err;
@@ -155,6 +164,8 @@ green_poll(struct pollfd fds[], nfds_t nfds, int timeout)
 	int retval;
 	int events = 0;
 	struct pollfd *fd;
+
+/*        printf("green_poll\n");*/
 
 	if (g_wait_callback == NULL)
 		return poll(fds, nfds, timeout);

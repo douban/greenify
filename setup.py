@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from Cython.Distutils import build_ext
 
 include_dirs = ['.']

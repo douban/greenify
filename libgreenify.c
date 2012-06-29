@@ -179,8 +179,7 @@ green_poll(struct pollfd fds[], nfds_t nfds, int timeout)
 		events |= EVENT_WRITE;
 	}
 
-	retval = callback_single_watcher(fd->fd, events);
-	return retval
-
+	callback_single_watcher(fd->fd, events, timeout);
+	return poll(fds, nfds, 0);
 }
 #endif

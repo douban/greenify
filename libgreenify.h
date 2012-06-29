@@ -17,7 +17,7 @@ struct greenify_watcher {
 	int events;
 };
 
-/* return 0 for ok, -1 for error */
+/* return 0 for events occurred, -1 for timeout */
 typedef int (*greenify_wait_callback_func_t) (struct greenify_watcher watchers[], int nwatchers, int timeout);
 
 void greenify_set_wait_callback(greenify_wait_callback_func_t callback);

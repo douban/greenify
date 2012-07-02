@@ -11,6 +11,7 @@
 #include <poll.h>
 #endif
 
+//#define DEBUG
 #ifdef DEBUG
 #define debug(...) fprintf(stderr, __VA_ARGS__)
 #else
@@ -92,6 +93,8 @@ green_read(int fildes, void *buf, size_t nbyte)
 	int flags_changed, flags, s_err;
 	ssize_t retval;
 
+	debug("green_read\n");
+
 	if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
 		return read(fildes, buf, nbyte);
 
@@ -112,7 +115,7 @@ green_write(int fildes, const void *buf, size_t nbyte)
 	int flags, flags_changed, s_err;
 	ssize_t retval;
 
-/*        printf("green_write\n");*/
+        debug("green_write\n");
 
 	if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
 		return write(fildes, buf, nbyte);
@@ -178,7 +181,7 @@ green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 
 	debug("green_poll\n");
 
-	if (g_wait_callback == NULL)
+	if (g_wait_callback == NULL || timeout == 0)
 		return poll(fds, nfds, timeout);
 
 	if (nfds != 1) {

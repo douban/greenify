@@ -3,9 +3,20 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <stdio.h>
+#include <inttypes.h>
+#include <stdint.h>
+
 #ifdef HAVE_POLL
 #include <poll.h>
 #endif
+
+#ifdef DEBUG
+#define debug(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
 #include "libgreenify.h"
 
 #define EVENT_READ 0x01
@@ -53,13 +64,13 @@ int callback_single_watcher(int fd, int events, int timeout)
 int
 green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 {
-	int flags_changed, flags, s_err;
-	ssize_t retval;
+	int flags_changed, flags, s_err, retval;
 
-/*        printf("green_connect\n");*/
+	debug("green_connect, callback=%016"PRIxPTR"\n", (uintptr_t)g_wait_callback);
 
 	if (g_wait_callback == NULL || !set_nonblock(socket, &flags)) {
-		return connect(socket, address, address_len);
+		retval = connect(socket, address, address_len);
+		return retval;
 	}
 
 	retval = connect(socket, address, address_len);
@@ -159,13 +170,13 @@ green_send(int socket, const void *buffer, size_t length, int flags)
 
 #ifdef HAVE_POLL
 int
-green_poll(struct pollfd fds[], nfds_t nfds, int timeout)
+green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
 	int retval;
 	int events = 0;
 	struct pollfd *fd;
 
-/*        printf("green_poll\n");*/
+	debug("green_poll\n");
 
 	if (g_wait_callback == NULL)
 		return poll(fds, nfds, timeout);

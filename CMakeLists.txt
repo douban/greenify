@@ -3,6 +3,9 @@ project(libgreenify)
 
 include(CheckFunctionExists)
 check_function_exists(poll HAVE_POLL)
+if(HAVE_POLL)
+	add_definitions(-D HAVE_POLL)
+endif(HAVE_POLL)
 
 add_library(greenify SHARED libgreenify.c)
 install(TARGETS greenify DESTINATION lib)

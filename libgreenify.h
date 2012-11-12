@@ -12,6 +12,10 @@ ssize_t green_write(int fildes, const void *buf, size_t nbyte);
 ssize_t green_recv(int socket, void *buffer, size_t length, int flags);
 ssize_t green_send(int socket, const void *buffer, size_t length, int flags);
 
+#ifdef HAVE_POLL
+int green_poll(struct pollfd *fds, nfds_t nfds, int timeout);
+#endif
+
 struct greenify_watcher {
 	int fd;
 	int events;

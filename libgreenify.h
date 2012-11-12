@@ -6,6 +6,10 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
+#ifdef HAVE_POLL
+#include <poll.h>
+#endif
+
 int green_connect(int socket, const struct sockaddr *address, socklen_t address_len);
 ssize_t green_read(int fildes, void *buf, size_t nbyte);
 ssize_t green_write(int fildes, const void *buf, size_t nbyte);

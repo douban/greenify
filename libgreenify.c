@@ -7,10 +7,6 @@
 #include <inttypes.h>
 #include <stdint.h>
 
-#ifdef HAVE_POLL
-#include <poll.h>
-#endif
-
 //#define DEBUG
 #ifdef DEBUG
 #define debug(...) fprintf(stderr, __VA_ARGS__)

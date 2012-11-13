@@ -52,7 +52,6 @@ def wait(watchers):
             objs.append(obj)
 
         for _ in xrange(count):
-            print 'test in'
             result = waiter.get()
             assert result is objs[_], 'Invalid switch into %s: %r (expected %r)' % (getcurrent(), result, objs[_])
             waiter.clear()

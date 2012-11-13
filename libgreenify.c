@@ -45,6 +45,11 @@ void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 	g_wait_callback = callback;
 }
 
+int callback_multiple_watchers(int* fds, int events, int timeout)
+{
+    
+}
+
 int callback_single_watcher(int fd, int events, int timeout)
 {
 	struct greenify_watcher watchers[1];

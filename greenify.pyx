@@ -25,16 +25,16 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
         timeout_in_s = timeout_in_ms / 1000.0
         t = Timeout.start_new(timeout_in_s)
         try:
-            for item in wait(watchers_list):
-                return 0
+            wait(watchers_list):
+            return 0
         except Timeout:
             return -1
         finally:
             t.cancel()
 
     else:
-        for item in wait(watchers_list):
-            return 0
+        wait(watchers_list):
+        return 0
 
 def greenify():
     greenify_set_wait_callback(wait_gevent)
@@ -42,18 +42,15 @@ def greenify():
 def wait(watchers):
     waiter = Waiter()
     switch = waiter.switch
-    objs = []
+    unique = object()
     try:
         count = len(watchers)
         for watcher in watchers:
-            obj = object()
-            watcher.start(switch, obj)
-            objs.append(obj)
-
+            watcher.start(switch, unique)
         result = waiter.get()
-        assert result in objs, 'Invalid switch into %s: %r' % (getcurrent(), result)
+        assert result is unique, 'Invalid switch into %s: %r' % (getcurrent(), result)
         waiter.clear()
-        yield result
+        return result
     finally:
         for watcher in watchers:
             watcher.stop()

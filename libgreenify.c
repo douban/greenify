@@ -45,11 +45,11 @@ void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
     g_wait_callback = callback;
 }
 
-int callback_multiple_watchers(struct greenify_watcher* watchers, int nfds, int timeout)
+int callback_multiple_watchers(struct greenify_watcher* watchers, int nwatchers, int timeout)
 {
     int retval;
     assert(g_wait_callback != NULL);
-    retval = g_wait_callback(watchers, nfds, timeout)
+    retval = g_wait_callback(watchers, nwatchers, timeout)
     free(watchers)
     return retval
 }
@@ -181,7 +181,6 @@ int
 green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
     int retval;
-    int events = 0;
     struct greenify_watcher* watchers;
     watchers = (struct greenify_watcher*)malloc(sizeof(struct greenify_watcher)*nfds);
 
@@ -198,7 +197,7 @@ green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
         }
 
         watchers[i].fd = fds[i].fd;
-        watchers[i].events = fds[i].events;
+        watchers[i].events = 0;
 
         if (fds[i].events & POLLIN || fds[i].events & POLLPRI) {
             watchers[i].events |= EVENT_READ;

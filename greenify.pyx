@@ -11,8 +11,7 @@ from gevent.timeout import Timeout
 cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
     cdef int fd, event
     cdef float timeout_in_s
-
-    #assert nwatchers == 1
+    cdef int i
 
     hub = get_hub()
     watchers_list = []

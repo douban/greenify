@@ -50,7 +50,6 @@ int callback_multiple_watchers(struct greenify_watcher* watchers, int nwatchers,
     int retval;
     assert(g_wait_callback != NULL);
     retval = g_wait_callback(watchers, nwatchers, timeout)
-    free(watchers)
     return retval
 }
 
@@ -181,8 +180,7 @@ int
 green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
     int retval;
-    struct greenify_watcher* watchers;
-    watchers = (struct greenify_watcher*)malloc(sizeof(struct greenify_watcher)*nfds);
+    struct greenify_watcher watchers[nfds];
 
     debug("green_poll\n");
 

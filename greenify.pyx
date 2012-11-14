@@ -15,7 +15,7 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
 
     hub = get_hub()
     watchers_list = []
-    for i in xrange(nwatchers):
+    for i in range(nwatchers):
         fd = watchers[i].fd;
         event = watchers[i].events;
         watcher = hub.loop.io(fd, event)

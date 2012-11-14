@@ -50,10 +50,10 @@ def wait(watchers):
             watcher.start(switch, obj)
             objs.append(obj)
 
-        for _ in xrange(count):
-            result = waiter.get()
-            assert result is objs[_], 'Invalid switch into %s: %r (expected %r)' % (getcurrent(), result, objs[_])
-            waiter.clear()
-            yield result
+        result = waiter.get()
+        assert result in objs, 'Invalid switch into %s: %r' % (getcurrent(), result)
+        waiter.clear()
+        yield result
     finally:
-        watcher.stop()
+        for watcher in watchers:
+            watcher.stop()

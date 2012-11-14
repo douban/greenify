@@ -25,7 +25,7 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
         timeout_in_s = timeout_in_ms / 1000.0
         t = Timeout.start_new(timeout_in_s)
         try:
-            wait(watchers_list):
+            wait(watchers_list)
             return 0
         except Timeout:
             return -1
@@ -33,7 +33,7 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
             t.cancel()
 
     else:
-        wait(watchers_list):
+        wait(watchers_list)
         return 0
 
 def greenify():

@@ -5,6 +5,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 
 #ifdef HAVE_POLL
 #include <poll.h>

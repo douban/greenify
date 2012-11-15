@@ -15,6 +15,7 @@ ssize_t green_read(int fildes, void *buf, size_t nbyte);
 ssize_t green_write(int fildes, const void *buf, size_t nbyte);
 ssize_t green_recv(int socket, void *buffer, size_t length, int flags);
 ssize_t green_send(int socket, const void *buffer, size_t length, int flags);
+int green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
 
 #ifdef HAVE_POLL
 int green_poll(struct pollfd *fds, nfds_t nfds, int timeout);

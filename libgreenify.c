@@ -201,7 +201,7 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
         }
     }
 
-    float timeout_in_ms = &timeout->tv_usec / 1000.0;
+    float timeout_in_ms = timeout->tv_usec / 1000.0;
     callback_multiple_watchers(read_watchers, read_count, timeout_in_ms);
     callback_multiple_watchers(write_watchers, write_count, timeout_in_ms);
     callback_multiple_watchers(except_watchers, except_count, timeout_in_ms);

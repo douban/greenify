@@ -51,8 +51,8 @@ int callback_multiple_watchers(struct greenify_watcher* watchers, int nwatchers,
 {
     int retval;
     assert(g_wait_callback != NULL);
-    retval = g_wait_callback(watchers, nwatchers, timeout)
-    return retval
+    retval = g_wait_callback(watchers, nwatchers, timeout);
+    return retval;
 }
 
 int callback_single_watcher(int fd, int events, int timeout)
@@ -181,9 +181,9 @@ int
 green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
 {
     struct greenify_watcher read_watchers[nfds], write_watchers[nfds], except_watchers[nfds];
-    int read_count = 0, write_count = 0, except_count = 0;
+    int read_count = 0, write_count = 0, except_count = 0, i = 0;
 
-    for (int i = 0; i < nfds; ++i) {
+    for (i = 0; i < nfds; ++i) {
         if (FD_ISSET(i, &readfds)) {
             read_watchers[read_count].fd = i;
             read_watchers[read_count].events = EVENT_READ;
@@ -213,6 +213,7 @@ int
 green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
     int retval;
+    nfds_t i;
     struct greenify_watcher watchers[nfds];
 
     debug("green_poll\n");
@@ -220,7 +221,7 @@ green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
     if (g_wait_callback == NULL || timeout == 0)
         return poll(fds, nfds, timeout);
 
-    for (nfds_t i = 0; i < nfds; i++) {
+    for (i = 0; i < nfds; i++) {
         if (fds[i].events & ~(POLLIN | POLLPRI | POLLOUT)) {
             fprintf(stderr, "[greenify] support POLLIN|POLLPRI|POLLOUT only, got 0x%x, may block.\n",
                     fds[i].events);

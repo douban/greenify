@@ -184,7 +184,7 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
     int count = 0, i = 0;
 
     debug("green_select\n");
-    if (g_wait_callback == NULL || timeout == 0)
+    if (g_wait_callback == NULL)
         return select(nfds, readfds, writefds, exceptfds, timeout);
 
     for (i = 0; i < nfds; ++i) {

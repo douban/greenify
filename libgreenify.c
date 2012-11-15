@@ -180,31 +180,28 @@ green_send(int socket, const void *buffer, size_t length, int flags)
 int
 green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
 {
-    struct greenify_watcher read_watchers[nfds], write_watchers[nfds], except_watchers[nfds];
-    int read_count = 0, write_count = 0, except_count = 0, i = 0;
+    struct greenify_watcher watchers[nfds];
+    int count = 0, i = 0;
+
+    debug("green_select\n");
+    if (g_wait_callback == NULL || timeout == 0)
+        return select(nfds, readfds, writefds, exceptfds, timeout);
 
     for (i = 0; i < nfds; ++i) {
-        if (FD_ISSET(i, &readfds)) {
-            read_watchers[read_count].fd = i;
-            read_watchers[read_count].events = EVENT_READ;
-            read_count++;
+        if (FD_ISSET(i, &readfds) || FD_ISSET(i, &exceptfds)) {
+            watchers[count].fd = i;
+            watchers[count].events = EVENT_READ;
+            count++;
         }
         if (FD_ISSET(i, &writefds)) {
-            write_watchers[write_count].fd = i;
-            write_watchers[write_count].events = EVENT_WRITE;
-            write_count++;
-        }
-        if (FD_ISSET(i, &exceptfds)) {
-            except_watchers[except_count].fd = i;
-            except_watchers[except_count].events = EVENT_READ;
-            except_count++;
+            watchers[count].fd = i;
+            watchers[count].events = EVENT_WRITE;
+            count++;
         }
     }
 
     float timeout_in_ms = timeout->tv_usec / 1000.0;
-    callback_multiple_watchers(read_watchers, read_count, timeout_in_ms);
-    callback_multiple_watchers(write_watchers, write_count, timeout_in_ms);
-    callback_multiple_watchers(except_watchers, except_count, timeout_in_ms);
+    callback_multiple_watchers(watchers, count, timeout_in_ms);
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 

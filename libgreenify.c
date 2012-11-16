@@ -187,12 +187,12 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
         return select(nfds, readfds, writefds, exceptfds, timeout);
 
     for (i = 0; i < nfds; ++i) {
-        if (FD_ISSET(i, &readfds) || FD_ISSET(i, &exceptfds)) {
+        if (FD_ISSET(i, readfds) || FD_ISSET(i, exceptfds)) {
             watchers[count].fd = i;
             watchers[count].events = EVENT_READ;
             count++;
         }
-        if (FD_ISSET(i, &writefds)) {
+        if (FD_ISSET(i, writefds)) {
             watchers[count].fd = i;
             watchers[count].events = EVENT_WRITE;
             count++;

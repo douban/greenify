@@ -204,7 +204,7 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
-#ifdef HAVE_POLL
+#if defined(HAVE_POLL) || defined(HAVE_POLL_H)
 int
 green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {

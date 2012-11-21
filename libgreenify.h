@@ -11,6 +11,10 @@
 #include <poll.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int green_connect(int socket, const struct sockaddr *address, socklen_t address_len);
 ssize_t green_read(int fildes, void *buf, size_t nbyte);
 ssize_t green_write(int fildes, const void *buf, size_t nbyte);
@@ -32,5 +36,9 @@ struct greenify_watcher {
 typedef int (*greenify_wait_callback_func_t) (struct greenify_watcher watchers[], int nwatchers, int timeout);
 
 void greenify_set_wait_callback(greenify_wait_callback_func_t callback);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

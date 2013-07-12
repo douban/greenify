@@ -12,7 +12,8 @@
 #include <unistd.h>
 #define debug(...) \
 	do { \
-		fprintf(stderr, "[greenify] [%zu] [%d] ", time(NULL), getpid()); \
+		time_t now = time(NULL); \
+		fprintf(stderr, "[greenify] [%s] [%d] ", ctime(&now), getpid()); \
 		fprintf(stderr, __VA_ARGS__); \
 	} while(0);
 #else  /* #define DEBUG */

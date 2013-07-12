@@ -8,12 +8,16 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-//#define DEBUG
 #ifdef DEBUG
-#define debug(...) fprintf(stderr, __VA_ARGS__)
-#else
+#include <unistd.h>
+#define debug(...) \
+	do { \
+		fprintf(stderr, "[greenify] [%zu] [%d] ", time(NULL), getpid()); \
+		fprintf(stderr, __VA_ARGS__); \
+	} while(0);
+#else  /* #define DEBUG */
 #define debug(...)
-#endif
+#endif /* #define DEBUG */
 
 #include "libgreenify.h"
 
@@ -72,7 +76,7 @@ green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 {
     int flags_changed, flags, s_err, retval;
 
-    debug("green_connect, callback=%016"PRIxPTR"\n", (uintptr_t)g_wait_callback);
+    debug("Enter green_connect\n");
 
     if (g_wait_callback == NULL || !set_nonblock(socket, &flags)) {
         retval = connect(socket, address, address_len);
@@ -98,7 +102,7 @@ green_read(int fildes, void *buf, size_t nbyte)
     int flags_changed, flags, s_err;
     ssize_t retval;
 
-    debug("green_read\n");
+    debug("Enter green_read\n");
 
     if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
         return read(fildes, buf, nbyte);
@@ -120,7 +124,7 @@ green_write(int fildes, const void *buf, size_t nbyte)
     int flags, flags_changed, s_err;
     ssize_t retval;
 
-        debug("green_write\n");
+    debug("Enter green_write\n");
 
     if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
         return write(fildes, buf, nbyte);
@@ -128,6 +132,8 @@ green_write(int fildes, const void *buf, size_t nbyte)
     do {
         retval = write(fildes, buf, nbyte);
         s_err = errno;
+	debug("write %zuB@%p to fd %d, return %zu, errno %d\n",
+			nbyte, buf, fildes, retval, s_err);
     } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
             && !(retval = callback_single_watcher(fildes, EVENT_WRITE, 0)));
 
@@ -141,6 +147,8 @@ green_recv(int socket, void *buffer, size_t length, int flags)
 {
     int sock_flags, sock_flags_changed, s_err;
     ssize_t retval;
+
+    debug("Enter green_recv\n");
 
     if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
         return recv(socket, buffer, length, flags);
@@ -162,12 +170,16 @@ green_send(int socket, const void *buffer, size_t length, int flags)
     int sock_flags, sock_flags_changed, s_err;
     ssize_t retval;
 
+    debug("Enter green_send\n");
+
     if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
         return send(socket, buffer, length, flags);
 
     do {
         retval = send(socket, buffer, length, flags);
         s_err = errno;
+	debug("send %zuB@%p to fd %d, return %zu, errno %d\n",
+			length, buffer, socket, retval, s_err);
     } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
             && !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
 
@@ -182,7 +194,7 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
     struct greenify_watcher watchers[nfds];
     int count = 0, i = 0;
 
-    debug("green_select\n");
+    debug("Enter green_select\n");
     if (g_wait_callback == NULL)
         return select(nfds, readfds, writefds, exceptfds, timeout);
 
@@ -212,7 +224,7 @@ green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
     nfds_t i;
     struct greenify_watcher watchers[nfds];
 
-    debug("green_poll\n");
+    debug("Enter green_poll\n");
 
     if (g_wait_callback == NULL || timeout == 0)
         return poll(fds, nfds, timeout);

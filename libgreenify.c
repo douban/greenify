@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdint.h>
-#include <sys/time.h>
+#include <time.h>
 
 #ifdef DEBUG
 #include <unistd.h>

@@ -13,7 +13,10 @@
 #define debug(...) \
 	do { \
 		time_t now = time(NULL); \
-		fprintf(stderr, "[greenify] [%s] [%d] ", ctime(&now), getpid()); \
+		char t[30]; \
+		ctime_r(&now, t); \
+		t[24] = '\0'; \
+		fprintf(stderr, "[greenify] [%s] [%d] ", t, getpid()); \
 		fprintf(stderr, __VA_ARGS__); \
 	} while(0);
 #else  /* #define DEBUG */

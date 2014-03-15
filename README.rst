@@ -21,9 +21,11 @@ getting started
 
 make MySQL-Python compatible with gevent_.
 
-1. mkvirtualenv test
+1. make virtualenv
+  mkvirtualenv test
 
-2. pip install git+git://github.com/douban/greenify.git#egg=greenify
+2. install greenify
+  pip install git+git://github.com/douban/greenify.git#egg=greenify
 
 3. modify mysql-connector-c_ manually, or get it from https://github.com/CMGS/mysql-connector-c
 

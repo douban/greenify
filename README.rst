@@ -23,20 +23,23 @@ make MySQL-Python compatible with gevent_.
 
 1. mkvirtualenv test
 
-2. pip install git+git://github.com/douban/greenify.git#egg=greenify
+2. install libgreenify
+   cmake -G 'Unix Makefiles' -D CMAKE_INSTALL_PREFIX=$VIRTUAL_ENV .
 
-3. modify mysql-connector-c_ manually, or get it from https://github.com/CMGS/mysql-connector-c
+3. pip install git+git://github.com/douban/greenify.git#egg=greenify
 
-4. install mysql_connector-c_ like:
+4. modify mysql-connector-c_ manually, or get it from https://github.com/CMGS/mysql-connector-c
+
+5. install mysql_connector-c_ like:
   cmake -G 'Unix Makefiles' -D GREENIFY_INCLUDE_DIR='$VIRTUAL_ENV_INCLUDE' -D GREENIFY_LIB_DIR='$VIRTUAL_ENV_LIB' -D WITH_GREENIFY=1 -D CMAKE_INSTALL_PREFIX='$VIRTUAL_ENV'
 
-5. modify MySQL-Python_ manually, or get it from https://github.com/CMGS/MySQL-python. Let setup.py know where is mysql-connector-c_ which was modified. I'm not sure the new-version branch is working good or not.
+6. modify MySQL-Python_ manually, or get it from https://github.com/CMGS/MySQL-python. Let setup.py know where is mysql-connector-c_ which was modified. I'm not sure the new-version branch is working good or not.
 
-6. in your app, active greenify_ before initiate environment:
+7. in your app, active greenify_ before initiate environment:
    import greenify
    greenify.greenify()
 
-7. enjoy the new world.
+8. enjoy the new world.
 
 be careful
 ----------

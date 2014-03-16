@@ -28,6 +28,7 @@ make MySQL-Python compatible with gevent_.
    cmake -G 'Unix Makefiles' -D CMAKE_INSTALL_PREFIX=$VIRTUAL_ENV .
 
 3. install greenify
+  export LIBGREENIFY_PREFIX=$VIRTUAL_ENV
   pip install git+git://github.com/douban/greenify.git#egg=greenify
 
 4. modify mysql-connector-c_ manually, or get it from https://github.com/CMGS/mysql-connector-c

@@ -1,4 +1,28 @@
+# distutils: sources = ['hook.c', 'elf_hook.c', 'libgreenify.c']
+# distutils: libraries = 'dl'
+
+cdef extern from "hook.h":
+    void* hook(char* library_filename, char* function_name, void* substitution_address)
+
 cdef extern from "libgreenify.h":
+    struct sockaddr:
+        pass
+    ctypedef unsigned long socklen_t
+    int green_connect(int socket, sockaddr *address, socklen_t address_len)
+    ssize_t green_read(int fildes, void *buf, size_t nbyte)
+    ssize_t green_write(int fildes, void *buf, size_t nbyte)
+    ssize_t green_recv(int socket, void *buffer, size_t length, int flags)
+    ssize_t green_send(int socket, void *buffer, size_t length, int flags)
+    struct fd_set:
+        pass
+    struct timeval:
+        pass
+    int green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, timeval *timeout)
+    struct pollfd:
+        pass
+    ctypedef unsigned long nfds_t
+    int green_poll(pollfd *fds, nfds_t nfds, int timeout)
+
     struct greenify_watcher:
         int fd
         int events
@@ -31,7 +55,6 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
             return -1
         finally:
             t.cancel()
-
     else:
         wait(watchers_list)
         return 0
@@ -54,3 +77,23 @@ def wait(watchers):
     finally:
         for watcher in watchers:
             watcher.stop()
+
+cpdef patch_lib(bytes library_path):
+    cdef char* path = library_path
+    cdef bint result = False
+    if NULL != hook(path, "connect", <void*>green_connect):
+        result = True
+    if NULL != hook(path, "read", <void*>green_read):
+        result = True
+    if NULL != hook(path, "write", <void*>green_write):
+        result = True
+    if NULL != hook(path, "recv", <void*>green_recv):
+        result = True
+    if NULL != hook(path, "send", <void*>green_send):
+        result = True
+    if NULL != hook(path, "select", <void*>green_select):
+        result = True
+    if NULL != hook(path, "poll", <void*>green_poll):
+        result = True
+
+    return result

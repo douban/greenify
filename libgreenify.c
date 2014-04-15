@@ -74,11 +74,23 @@ int callback_single_watcher(int fd, int events, int timeout)
     retval = g_wait_callback(watchers, 1, timeout);
     return retval;
 }
+static int
+is_not_socket(int fd) 
+{
+    int opt;
+    socklen_t len = sizeof(opt);
+    if(-1 == getsockopt(fd, SOL_SOCKET, SO_DEBUG, &opt, &len) && errno == ENOTSOCK)
+    {
+        errno = 0;
+        return 1;
+    }
+    return 0;
+}
 
 int
 green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 {
-    int flags_changed, flags, s_err, retval;
+    int flags, s_err, retval;
 
     debug("Enter green_connect\n");
 
@@ -103,12 +115,12 @@ green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
 ssize_t
 green_read(int fildes, void *buf, size_t nbyte)
 {
-    int flags_changed, flags, s_err;
+    int flags, s_err;
     ssize_t retval;
 
     debug("Enter green_read\n");
 
-    if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
+    if (g_wait_callback == NULL || is_not_socket(fildes) || !set_nonblock(fildes, &flags))
         return read(fildes, buf, nbyte);
 
     do {
@@ -125,12 +137,12 @@ green_read(int fildes, void *buf, size_t nbyte)
 ssize_t
 green_write(int fildes, const void *buf, size_t nbyte)
 {
-    int flags, flags_changed, s_err;
+    int flags, s_err;
     ssize_t retval;
 
     debug("Enter green_write\n");
 
-    if (g_wait_callback == NULL || !set_nonblock(fildes, &flags))
+    if (g_wait_callback == NULL || is_not_socket(fildes) || !set_nonblock(fildes, &flags))
         return write(fildes, buf, nbyte);
 
     do {
@@ -149,7 +161,7 @@ green_write(int fildes, const void *buf, size_t nbyte)
 ssize_t
 green_recv(int socket, void *buffer, size_t length, int flags)
 {
-    int sock_flags, sock_flags_changed, s_err;
+    int sock_flags, s_err;
     ssize_t retval;
 
     debug("Enter green_recv\n");
@@ -171,7 +183,7 @@ green_recv(int socket, void *buffer, size_t length, int flags)
 ssize_t
 green_send(int socket, const void *buffer, size_t length, int flags)
 {
-    int sock_flags, sock_flags_changed, s_err;
+    int sock_flags, s_err;
     ssize_t retval;
 
     debug("Enter green_send\n");
@@ -220,11 +232,10 @@ green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, str
     return select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
-#if defined(HAVE_POLL) || defined(HAVE_POLL_H)
+#ifndef NO_POLL
 int
 green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
 {
-    int retval;
     nfds_t i;
     struct greenify_watcher watchers[nfds];
 

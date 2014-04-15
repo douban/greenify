@@ -3,9 +3,9 @@ project(libgreenify)
 
 include(CheckFunctionExists)
 check_function_exists(poll HAVE_POLL)
-if(HAVE_POLL)
-	add_definitions(-D HAVE_POLL)
-endif(HAVE_POLL)
+if(NOT HAVE_POLL)
+    add_definitions(-D NO_POLL)
+endif()
 
 if(DEBUG)
 	add_definitions(-D DEBUG)

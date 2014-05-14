@@ -356,10 +356,10 @@ void *elf_hook(char const *module_filename, void const *module_address, char con
         return original;
 
     if (
-        section_by_type(descriptor, SHT_DYNSYM, &dynsym) ||  //get ".dynsym" section
-        symbol_by_name(descriptor, dynsym, name, &symbol, &name_index) ||  //actually, we need only the index of symbol named "name" in the ".dynsym" table
-        section_by_name(descriptor, REL_PLT, &rel_plt) ||  //get ".rel.plt" (for 32-bit) or ".rela.plt" (for 64-bit) section
-        section_by_name(descriptor, REL_DYN, &rel_dyn)  //get ".rel.dyn" (for 32-bit) or ".rela.dyn" (for 64-bit) section
+        section_by_type(descriptor, SHT_DYNSYM, &dynsym) || NULL == dynsym || //get ".dynsym" section
+        symbol_by_name(descriptor, dynsym, name, &symbol, &name_index) || NULL == symbol || //actually, we need only the index of symbol named "name" in the ".dynsym" table
+        section_by_name(descriptor, REL_PLT, &rel_plt) || NULL == rel_plt || //get ".rel.plt" (for 32-bit) or ".rela.plt" (for 64-bit) section
+        section_by_name(descriptor, REL_DYN, &rel_dyn) || NULL == rel_dyn //get ".rel.dyn" (for 32-bit) or ".rela.dyn" (for 64-bit) section
        )
     {  //if something went wrong
         free(dynsym);

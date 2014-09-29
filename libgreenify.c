@@ -102,7 +102,7 @@ green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
     retval = connect(socket, address, address_len);
     s_err = errno;
     if (retval < 0 && (s_err == EWOULDBLOCK || s_err == EALREADY || s_err == EINPROGRESS)) {
-        callback_single_watcher(socket, EVENT_READ, 0);
+        callback_single_watcher(socket, EVENT_WRITE, 0);
         getsockopt(socket, SOL_SOCKET, SO_ERROR, &s_err, &address_len);
         retval = s_err ? -1 : 0;
     }

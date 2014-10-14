@@ -3,6 +3,6 @@ from Cython.Build import cythonize
 
 setup(
     name = "greenify",
-    version='0.1',
+    version='0.2',
     ext_modules = cythonize('*.pyx'),
 )

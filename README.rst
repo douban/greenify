@@ -10,6 +10,14 @@ the original modules.
 
 Currently greenify_ only supports ELF format modules, and is tested on Linux.
 
+Build status
+------------
+
+- Branch **master** : |travis_master|
+
+.. |travis_master| image:: https://travis-ci.org/douban/greenify.svg?branch=master
+    :target: https://travis-ci.org/douban/greenify
+
 Install from source
 -------------------
 

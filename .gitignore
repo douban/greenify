@@ -1,10 +1,14 @@
 CMakeCache.txt
 CMakeFiles/
-Makefile
 cmake_install.cmake
+*.o
 *.dylib
 *.so
+*.sw[op]
+*.py[co]
 greenify.c
 install_manifest.txt
-/build/
+build/
+dist/
+venv/
 *.egg-info/

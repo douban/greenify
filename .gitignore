@@ -12,3 +12,4 @@ build/
 dist/
 venv/
 *.egg-info/
+*.egg

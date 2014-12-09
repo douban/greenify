@@ -1,6 +1,3 @@
-# distutils: sources = ['hook.c', 'elf_hook.c', 'libgreenify.c']
-# distutils: libraries = 'dl'
-
 cdef extern from "hook.h":
     void* hook(char* library_filename, char* function_name, void* substitution_address)
 

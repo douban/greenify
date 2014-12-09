@@ -11,14 +11,14 @@
 #ifdef DEBUG
 #include <unistd.h>
 #define debug(...) \
-	do { \
-		time_t now = time(NULL); \
-		char t[30]; \
-		ctime_r(&now, t); \
-		t[24] = '\0'; \
-		fprintf(stderr, "[greenify] [%s] [%d] ", t, getpid()); \
-		fprintf(stderr, __VA_ARGS__); \
-	} while(0);
+    do { \
+        time_t now = time(NULL); \
+        char t[30]; \
+        ctime_r(&now, t); \
+        t[24] = '\0'; \
+        fprintf(stderr, "[greenify] [%s] [%d] ", t, getpid()); \
+        fprintf(stderr, __VA_ARGS__); \
+    } while(0);
 #else  /* #define DEBUG */
 #define debug(...)
 #endif /* #define DEBUG */
@@ -148,8 +148,8 @@ green_write(int fildes, const void *buf, size_t nbyte)
     do {
         retval = write(fildes, buf, nbyte);
         s_err = errno;
-	debug("write %zuB@%p to fd %d, return %zu, errno %d\n",
-			nbyte, buf, fildes, retval, s_err);
+        debug("write %zuB@%p to fd %d, return %zu, errno %d\n",
+              nbyte, buf, fildes, retval, s_err);
     } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
             && !(retval = callback_single_watcher(fildes, EVENT_WRITE, 0)));
 
@@ -189,13 +189,40 @@ green_send(int socket, const void *buffer, size_t length, int flags)
     debug("Enter green_send\n");
 
     if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
+    {
         return send(socket, buffer, length, flags);
+    }
 
     do {
         retval = send(socket, buffer, length, flags);
         s_err = errno;
-	debug("send %zuB@%p to fd %d, return %zu, errno %d\n",
-			length, buffer, socket, retval, s_err);
+        debug("send %zuB@%p to fd %d, return %zu, errno %d\n",
+              length, buffer, socket, retval, s_err);
+    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
+            && !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
+
+    restore_flags(socket, sock_flags);
+    errno = s_err;
+    return retval;
+}
+
+
+ssize_t green_sendmsg(int socket, const struct msghdr* message, int flags)
+{
+    int sock_flags, s_err;
+    ssize_t retval;
+
+    debug("Enter green_sendmsg\n");
+
+    if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
+    {
+        return sendmsg(socket, message, flags);
+    }
+
+    do {
+        retval = sendmsg(socket, message, flags);
+        s_err = errno;
+        debug("sendmsg to fd %d, return %zu, errno %d\n", socket, retval, s_err);
     } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
             && !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
 

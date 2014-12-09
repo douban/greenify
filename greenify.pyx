@@ -4,12 +4,15 @@ cdef extern from "hook.h":
 cdef extern from "libgreenify.h":
     struct sockaddr:
         pass
+    struct msghdr:
+        pass
     ctypedef unsigned long socklen_t
-    int green_connect(int socket, sockaddr *address, socklen_t address_len)
+    int green_connect(int socket, const sockaddr *address, socklen_t address_len)
     ssize_t green_read(int fildes, void *buf, size_t nbyte)
     ssize_t green_write(int fildes, void *buf, size_t nbyte)
     ssize_t green_recv(int socket, void *buffer, size_t length, int flags)
     ssize_t green_send(int socket, void *buffer, size_t length, int flags)
+    ssize_t green_sendmsg(int socket, const msghdr* message, int flags)
     struct fd_set:
         pass
     struct timeval:
@@ -87,6 +90,8 @@ cpdef patch_lib(bytes library_path):
     if NULL != hook(path, "recv", <void*>green_recv):
         result = True
     if NULL != hook(path, "send", <void*>green_send):
+        result = True
+    if NULL != hook(path, "sendmsg", <void*>green_sendmsg):
         result = True
     if NULL != hook(path, "select", <void*>green_select):
         result = True

@@ -18,7 +18,7 @@
         t[24] = '\0'; \
         fprintf(stderr, "[greenify] [%s] [%d] ", t, getpid()); \
         fprintf(stderr, __VA_ARGS__); \
-    } while(0);
+    } while(0)
 #else  /* #define DEBUG */
 #define debug(...)
 #endif /* #define DEBUG */
@@ -112,124 +112,115 @@ green_connect(int socket, const struct sockaddr *address, socklen_t address_len)
     return retval;
 }
 
-ssize_t
-green_read(int fildes, void *buf, size_t nbyte)
+
+#define _IMPL_SOCKET_ONLY_GREEN_FN(FN, EV, FID, ...) \
+    do { \
+        int flags, s_err; \
+        ssize_t retval; \
+        \
+        debug("Enter green_" #FN "\n"); \
+        \
+        if (g_wait_callback == NULL || is_not_socket((FID)) || !set_nonblock((FID), &flags)) { \
+            return FN((FID), __VA_ARGS__); \
+        } \
+        \
+        do { \
+            retval = FN((FID), __VA_ARGS__); \
+            s_err = errno; \
+            debug(#FN ", return %zd, errno: %d\n", retval, s_err); \
+        } while (retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN) \
+                && !(retval = callback_single_watcher((FID), (EV), 0))); \
+        \
+        restore_flags((FID), flags); \
+        errno = s_err; \
+        return retval; \
+    } while(0)
+
+ssize_t green_read(int fildes, void *buf, size_t nbyte)
 {
-    int flags, s_err;
-    ssize_t retval;
-
-    debug("Enter green_read\n");
-
-    if (g_wait_callback == NULL || is_not_socket(fildes) || !set_nonblock(fildes, &flags))
-        return read(fildes, buf, nbyte);
-
-    do {
-        retval = read(fildes, buf, nbyte);
-        s_err = errno;
-    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-            && !(retval = callback_single_watcher(fildes, EVENT_READ, 0)));
-
-    restore_flags(fildes, flags);
-    errno = s_err;
-    return retval;
+    _IMPL_SOCKET_ONLY_GREEN_FN(read, EVENT_READ, fildes, buf, nbyte);
 }
 
-ssize_t
-green_write(int fildes, const void *buf, size_t nbyte)
+ssize_t green_write(int fildes, const void *buf, size_t nbyte)
 {
-    int flags, s_err;
-    ssize_t retval;
-
-    debug("Enter green_write\n");
-
-    if (g_wait_callback == NULL || is_not_socket(fildes) || !set_nonblock(fildes, &flags))
-        return write(fildes, buf, nbyte);
-
-    do {
-        retval = write(fildes, buf, nbyte);
-        s_err = errno;
-        debug("write %zuB@%p to fd %d, return %zu, errno %d\n",
-              nbyte, buf, fildes, retval, s_err);
-    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-            && !(retval = callback_single_watcher(fildes, EVENT_WRITE, 0)));
-
-    restore_flags(fildes, flags);
-    errno = s_err;
-    return retval;
+    _IMPL_SOCKET_ONLY_GREEN_FN(write, EVENT_WRITE, fildes, buf, nbyte);
 }
 
-ssize_t
-green_recv(int socket, void *buffer, size_t length, int flags)
+ssize_t green_pread(int fd, void *buf, size_t count, off_t offset)
 {
-    int sock_flags, s_err;
-    ssize_t retval;
-
-    debug("Enter green_recv\n");
-
-    if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
-        return recv(socket, buffer, length, flags);
-
-    do {
-        retval = recv(socket, buffer, length, flags);
-        s_err = errno;
-    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-            && !(retval = callback_single_watcher(socket, EVENT_READ, 0)));
-
-    restore_flags(socket, sock_flags);
-    errno = s_err;
-    return retval;
+    _IMPL_SOCKET_ONLY_GREEN_FN(pread, EVENT_READ, fd, buf, count, offset);
 }
 
-ssize_t
-green_send(int socket, const void *buffer, size_t length, int flags)
+ssize_t green_pwrite(int fd, const void *buf, size_t count, off_t offset)
 {
-    int sock_flags, s_err;
-    ssize_t retval;
-
-    debug("Enter green_send\n");
-
-    if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
-    {
-        return send(socket, buffer, length, flags);
-    }
-
-    do {
-        retval = send(socket, buffer, length, flags);
-        s_err = errno;
-        debug("send %zuB@%p to fd %d, return %zu, errno %d\n",
-              length, buffer, socket, retval, s_err);
-    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-            && !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
-
-    restore_flags(socket, sock_flags);
-    errno = s_err;
-    return retval;
+    _IMPL_SOCKET_ONLY_GREEN_FN(pwrite, EVENT_WRITE, fd, buf, count, offset);
 }
 
-
-ssize_t green_sendmsg(int socket, const struct msghdr* message, int flags)
+ssize_t green_readv(int fd, const struct iovec *iov, int iovcnt)
 {
-    int sock_flags, s_err;
-    ssize_t retval;
-
-    debug("Enter green_sendmsg\n");
-
-    if (g_wait_callback == NULL || !set_nonblock(socket, &sock_flags))
-    {
-        return sendmsg(socket, message, flags);
-    }
-
-    do {
-        retval = sendmsg(socket, message, flags);
-        s_err = errno;
-        debug("sendmsg to fd %d, return %zu, errno %d\n", socket, retval, s_err);
-    } while(retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN)
-            && !(retval = callback_single_watcher(socket, EVENT_WRITE, 0)));
-
-    restore_flags(socket, sock_flags);
-    errno = s_err;
-    return retval;
+    _IMPL_SOCKET_ONLY_GREEN_FN(readv, EVENT_READ, fd, iov, iovcnt);
 }
+
+ssize_t green_writev(int fd, const struct iovec *iov, int iovcnt)
+{
+    _IMPL_SOCKET_ONLY_GREEN_FN(writev, EVENT_WRITE, fd, iov, iovcnt);
+}
+
+#undef _IMPL_SOCKET_ONLY_GREEN_FN
+
+
+#define _IMPL_GREEN_FN(FN, EV, FID, ...) \
+    do { \
+        int sock_flags, s_err; \
+        ssize_t retval; \
+        \
+        debug("Enter green_" #FN "\n"); \
+        \
+        if (g_wait_callback == NULL || !set_nonblock((FID), &sock_flags)) { \
+            return FN((FID), __VA_ARGS__); \
+        } \
+        \
+        do { \
+            retval = FN((FID), __VA_ARGS__); \
+            s_err = errno; \
+            debug(#FN ", return %zd, errno: %d\n", retval, s_err); \
+        } while (retval < 0 && (s_err == EWOULDBLOCK || s_err == EAGAIN) \
+                && !(retval = callback_single_watcher((FID), (EV), 0))); \
+        \
+        restore_flags((FID), sock_flags); \
+        errno = s_err; \
+        return retval; \
+    } while(0)
+
+ssize_t green_recv(int socket, void *buffer, size_t length, int flags) {
+    _IMPL_GREEN_FN(recv, EVENT_READ, socket, buffer, length, flags);
+}
+
+ssize_t green_send(int socket, const void *buffer, size_t length, int flags) {
+    _IMPL_GREEN_FN(send, EVENT_WRITE, socket, buffer, length, flags);
+}
+
+ssize_t green_recvmsg(int socket, struct msghdr *message, int flags) {
+    _IMPL_GREEN_FN(recvmsg, EVENT_READ, socket, message, flags);
+}
+
+ssize_t green_sendmsg(int socket, const struct msghdr* message, int flags) {
+    _IMPL_GREEN_FN(sendmsg, EVENT_WRITE, socket, message, flags);
+}
+
+ssize_t green_recvfrom(int sockfd, void *buf, size_t len, int flags,
+        struct sockaddr *src_addr, socklen_t *addrlen)
+{
+    _IMPL_GREEN_FN(recvfrom, EVENT_READ, sockfd, buf, len, flags, src_addr, addrlen);
+}
+
+ssize_t green_sendto(int sockfd, const void *buf, size_t len, int flags,
+        const struct sockaddr *dest_addr, socklen_t addrlen)
+{
+    _IMPL_GREEN_FN(sendto, EVENT_WRITE, sockfd, buf, len, flags, dest_addr, addrlen);
+}
+
+#undef _IMPL_GREEN_FN
 
 int
 green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)

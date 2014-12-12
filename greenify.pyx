@@ -1,36 +1,33 @@
-cdef extern from "hook.h":
-    void* hook(char* library_filename, char* function_name, void* substitution_address)
+from gevent.hub import get_hub, getcurrent, Waiter
+from gevent.timeout import Timeout
 
 cdef extern from "libgreenify.h":
-    struct sockaddr:
-        pass
-    struct msghdr:
-        pass
-    ctypedef unsigned long socklen_t
-    int green_connect(int socket, const sockaddr *address, socklen_t address_len)
-    ssize_t green_read(int fildes, void *buf, size_t nbyte)
-    ssize_t green_write(int fildes, void *buf, size_t nbyte)
-    ssize_t green_recv(int socket, void *buffer, size_t length, int flags)
-    ssize_t green_send(int socket, void *buffer, size_t length, int flags)
-    ssize_t green_sendmsg(int socket, const msghdr* message, int flags)
-    struct fd_set:
-        pass
-    struct timeval:
-        pass
-    int green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, timeval *timeout)
-    struct pollfd:
-        pass
-    ctypedef unsigned long nfds_t
-    int green_poll(pollfd *fds, nfds_t nfds, int timeout)
-
     struct greenify_watcher:
         int fd
         int events
     ctypedef int (*greenify_wait_callback_func_t) (greenify_watcher* watchers, int nwatchers, int timeout)
     cdef void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 
-from gevent.hub import get_hub, getcurrent, Waiter
-from gevent.timeout import Timeout
+cdef extern from "hook_greenify.h":
+
+    ctypedef enum greenified_function_t:
+        FN_CONNECT
+        FN_READ
+        FN_WRITE
+        FN_PREAD
+        FN_PWRITE
+        FN_READV
+        FN_WRITEV
+        FN_RECV
+        FN_SEND
+        FN_RECVMSG
+        FN_SENDMSG
+        FN_RECVFROM
+        FN_SENDTO
+        FN_SELECT
+        FN_POLL
+
+    void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
 
 cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
     cdef int fd, event
@@ -81,21 +78,10 @@ def wait(watchers):
 cpdef patch_lib(bytes library_path):
     cdef char* path = library_path
     cdef bint result = False
-    if NULL != hook(path, "connect", <void*>green_connect):
-        result = True
-    if NULL != hook(path, "read", <void*>green_read):
-        result = True
-    if NULL != hook(path, "write", <void*>green_write):
-        result = True
-    if NULL != hook(path, "recv", <void*>green_recv):
-        result = True
-    if NULL != hook(path, "send", <void*>green_send):
-        result = True
-    if NULL != hook(path, "sendmsg", <void*>green_sendmsg):
-        result = True
-    if NULL != hook(path, "select", <void*>green_select):
-        result = True
-    if NULL != hook(path, "poll", <void*>green_poll):
-        result = True
+    for fn in (FN_CONNECT, FN_READ, FN_WRITE, FN_PREAD, FN_PWRITE, FN_READV,
+               FN_WRITEV, FN_RECV, FN_SEND, FN_RECVMSG, FN_SENDMSG,
+               FN_RECVFROM, FN_SENDTO, FN_SELECT, FN_POLL):
+        if NULL != greenify_patch_lib(path, fn):
+            result = True
 
     return result

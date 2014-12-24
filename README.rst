@@ -27,7 +27,7 @@ Install from source
 
 or::
 
-  pip install git+git://github.com/douban/greenify.git#egg=greenify
+  pip install greenify
 
 Usage
 -----

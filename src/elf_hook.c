@@ -388,8 +388,12 @@ void *elf_hook(char const *module_filename, void const *module_address, char con
     for (i = 0; i < rel_plt_amount; ++i)  //lookup the ".rel.plt" table
         if (ELF_R_SYM(rel_plt_table[i].r_info) == name_index)  //if we found the symbol to substitute in ".rel.plt"
         {
-            original = (void *)*(size_t *)(((size_t)module_address) + rel_plt_table[i].r_offset);  //save the original function address
-            *(size_t *)(((size_t)module_address) + rel_plt_table[i].r_offset) = (size_t)substitution;  //and replace it with the substitutional
+            name_address = (size_t *)(((size_t)module_address) + rel_plt_table[i].r_offset);
+            mprotect((void *)(((size_t)name_address) & (((size_t)-1) ^ (pagesize - 1))), pagesize, PROT_READ | PROT_WRITE);  //mark a memory page that contains the relocation as writable
+            original = (void *)*name_address;  //save the original function address
+            *name_address = (size_t)substitution;  //and replace it with the substitutional
+            mprotect((void *)(((size_t)name_address) & (((size_t)-1) ^ (pagesize - 1))), pagesize, PROT_READ | PROT_EXEC);  //mark a memory page that contains the relocation back as executable
+
 
             break;  //the target symbol appears in ".rel.plt" only once
         }

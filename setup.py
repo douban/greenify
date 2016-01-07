@@ -1,10 +1,10 @@
 import sys
 from glob import glob
 from setuptools import setup, Extension
+
+version = '0.2.1'
+
 # setuptools DWIM monkey-patch madness: http://dou.bz/37m3XL
-
-version = '0.2'
-
 if 'setuptools.extension' in sys.modules:
     m = sys.modules['setuptools.extension']
     m.Extension.__dict__ = m._Extension.__dict__
@@ -19,7 +19,7 @@ libraries = ["dl"]
 
 setup(
     name="greenify",
-    version='0.2',
+    version=version,
     description = "Make C module compatible with gevent at runtime.",
     long_description=readme(),
     platforms=['Linux'],

@@ -1,14 +1,19 @@
 # coding: utf-8
 
 import time
-from SimpleHTTPServer import SimpleHTTPRequestHandler
-import SocketServer
+try:
+    from SimpleHTTPServer import SimpleHTTPRequestHandler
+    from SocketServer import TCPServer
+except ImportError:
+    from http.server import SimpleHTTPRequestHandler
+    from socketserver import TCPServer
+
 
 PORT = 0x2304
 BLOCKING_SECONDS = 10  # seconds
 
 
-class Server(SocketServer.TCPServer):
+class Server(TCPServer):
     allow_reuse_address = True
 
 

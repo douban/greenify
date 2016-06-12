@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import print_function
 
 # greenify
 import greenify
@@ -20,42 +21,46 @@ stack = []
 
 def c_http_head_check(addr):
     stack.append(('begin', addr, 'c'))
-    print >> sys.stderr, '%.5f head %s begin' % (time.time(), addr)
+    print('%.5f head %s begin' % (time.time(), addr), file=sys.stderr)
     ret = mod_http_head.http_head(*addr)
-    print >> sys.stderr, '%.5f head %s end' % (time.time(), addr)
+    print('%.5f head %s end' % (time.time(), addr), file=sys.stderr)
     stack.append(('end', addr, 'c'))
     assert ret == 1
 
 
 def python_http_head_check(addr):
-    import httplib
+    try:
+        from httplib import HTTPConnection
+    except ImportError:
+        from http.client import HTTPConnection
+
     stack.append(('begin', addr, 'python'))
-    print >> sys.stderr, '%.5f head %s begin' % (time.time(), addr)
-    conn = httplib.HTTPConnection(*addr)
+    print('%.5f head %s begin' % (time.time(), addr), file=sys.stderr)
+    conn = HTTPConnection(*addr)
     conn.request("HEAD", "/")
     resp = conn.getresponse()
     status_code = resp.status
-    print >> sys.stderr, '%.5f head %s end' % (time.time(), addr)
+    print('%.5f head %s end' % (time.time(), addr), file=sys.stderr)
     stack.append(('end', addr, 'python'))
     assert 200 <= status_code < 400
 
 
 def sleeper():
     stack.append(('begin', 'sleeper'))
-    print >> sys.stderr, '%.5f sleeper begin' % time.time()
+    print('%.5f sleeper begin' % time.time(), file=sys.stderr)
     time.sleep(fake_slow_http_server.BLOCKING_SECONDS/2)
-    print >> sys.stderr, '%.5f sleeper end' % time.time()
+    print('%.5f sleeper end' % time.time(), file=sys.stderr)
     stack.append(('end', 'sleeper'))
 
 
 def main():
     global stack
     local_addr = ("localhost", str(fake_slow_http_server.PORT))
-    test_sites = (local_addr, ("msn.com", "80"), ("baidu.com", "80"),
-                  ("douban.fm", "80"), ("tumblr.com", "80"))
+    test_sites = (local_addr, ("msn.com", "80"), ("taobao.com", "80"),
+                  ("douban.fm", "80"), ("github.com", "80"))
     for fn in [python_http_head_check, c_http_head_check]:
         stack = []
-        print 'test %s' % fn.__name__
+        print('test %s' % fn.__name__)
         t0 = time.time()
         workers = [
             gevent.spawn(fn, addr)
@@ -65,8 +70,8 @@ def main():
 
         gevent.joinall(workers)
         time_elapsed = time.time() - t0
-        print 'done in %.5fs' % (time_elapsed)
-        print
+        print('done in %.5fs' % (time_elapsed))
+        print()
         # HEAD to fake_slow_http_server is expected to
         # be the slowest worker
         assert stack[-1][:2] == ('end', local_addr), \

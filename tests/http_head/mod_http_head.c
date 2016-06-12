@@ -55,7 +55,11 @@ http_head(PyObject* self, PyObject* args)
         return NULL;
     }
     long ret = c_http_head(host, port);
+#if PY_MAJOR_VERSION >= 3
+    return PyLong_FromLong(ret);
+#else
     return PyInt_FromLong(ret);
+#endif
 }
 
 
@@ -65,9 +69,28 @@ static PyMethodDef ModHttpHeadMethods[] =
     {NULL, NULL, 0, NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "mod_http_head",     /* m_name */
+    "",  /* m_doc */
+    -1,                  /* m_size */
+    ModHttpHeadMethods,    /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
 
+PyMODINIT_FUNC
+PyInit_mod_http_head(void)
+{
+    return PyModule_Create(&moduledef);
+}
+#else
 PyMODINIT_FUNC
 initmod_http_head(void)
 {
     (void) Py_InitModule("mod_http_head", ModHttpHeadMethods);
 }
+#endif

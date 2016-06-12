@@ -75,8 +75,12 @@ def wait(watchers):
         for watcher in watchers:
             watcher.stop()
 
-cpdef patch_lib(bytes library_path):
-    cdef char* path = library_path
+cpdef patch_lib(library_path):
+    cdef char* path
+    if isinstance(library_path, unicode):
+        library_path = (<unicode>library_path).encode('utf8')
+
+    path = library_path
     cdef bint result = False
     for fn in (FN_CONNECT, FN_READ, FN_WRITE, FN_PREAD, FN_PWRITE, FN_READV,
                FN_WRITEV, FN_RECV, FN_SEND, FN_RECVMSG, FN_SENDMSG,

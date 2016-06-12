@@ -2,7 +2,7 @@ import sys
 from glob import glob
 from setuptools import setup, Extension
 
-version = '0.2.2'
+version = '0.3.0'
 
 # setuptools DWIM monkey-patch madness: http://dou.bz/37m3XL
 if sys.version_info.major < 3 and'setuptools.extension' in sys.modules:

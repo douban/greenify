@@ -2,10 +2,12 @@ language: python
 
 python:
   - 2.7
+  - 3.5
 
 install:
   - pip install Cython
   - pip install gevent
+  - pip install future
 
 before_script:
   - python setup.py install

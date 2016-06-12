@@ -4,10 +4,11 @@ from setuptools import setup, Extension
 
 version = '0.2.2'
 
+if sys.version[0] == '2':
 # setuptools DWIM monkey-patch madness: http://dou.bz/37m3XL
-if 'setuptools.extension' in sys.modules:
-    m = sys.modules['setuptools.extension']
-    m.Extension.__dict__ = m._Extension.__dict__
+    if 'setuptools.extension' in sys.modules:
+        m = sys.modules['setuptools.extension']
+        m.Extension.__dict__ = m._Extension.__dict__
 
 def readme():
     with open('README.rst') as f:

@@ -1,8 +1,8 @@
 # coding: utf-8
 
 import time
-from SimpleHTTPServer import SimpleHTTPRequestHandler
-import SocketServer
+from http.server  import SimpleHTTPRequestHandler
+import socketserver as SocketServer
 
 PORT = 0x2304
 BLOCKING_SECONDS = 10  # seconds

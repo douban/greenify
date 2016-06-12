@@ -4,8 +4,8 @@ from distutils.core import setup, Extension
 
 virtualenv_path = os.environ.get('VIRTUAL_ENV')
 
-include_dirs = filter(None, [os.environ.get('INCLUDE_DIRS')])
-library_dirs = filter(None, [os.environ.get('LIBRARY_DIRS')])
+include_dirs = list(filter(None, [os.environ.get('INCLUDE_DIRS')]))
+library_dirs = list(filter(None, [os.environ.get('LIBRARY_DIRS')]))
 
 if virtualenv_path:
     include_dirs.append('%s/include' % virtualenv_path)

@@ -4,11 +4,6 @@ from setuptools import setup, Extension
 
 version = '0.3.0'
 
-# setuptools DWIM monkey-patch madness: http://dou.bz/37m3XL
-if sys.version_info.major < 3 and'setuptools.extension' in sys.modules:
-    m = sys.modules['setuptools.extension']
-    m.Extension.__dict__ = m._Extension.__dict__
-
 def readme():
     with open('README.rst') as f:
         return f.read()
@@ -35,7 +30,7 @@ setup(
     author_email="tianzhongbo@douban.com",
     url="https://github.com/douban/greenify",
     download_url = 'https://github.com/douban/greenify/archive/%s.tar.gz' % version,
-    setup_requires=['setuptools_cython', 'Cython >= 0.18'],
+    setup_requires=['Cython >= 0.18'],
     install_requires=['gevent'],
     ext_modules=[
         Extension('greenify', sources, include_dirs=include_dirs,

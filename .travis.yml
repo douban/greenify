@@ -1,34 +1,28 @@
 language: python
-
 python:
-  - 2.7
-  - 3.5
-
+- 2.7
+- 3.5
 install:
-  - pip install -U pip setuptools
-  - pip install Cython
-  - pip install gevent
-
+- pip install -U pip setuptools
+- pip install Cython
+- pip install gevent
 before_script:
-  - python setup.py install
-
+- python setup.py install
 script:
-  - cd tests/http_head
-  - python fake_slow_http_server.py&
-  - pid=$!
-  - python setup.py build_ext --inplace
-  - python test.py
-  - kill $pid
-
+- cd tests/http_head
+- python fake_slow_http_server.py&
+- pid=$!
+- python setup.py build_ext --inplace
+- python test.py
+- kill $pid
 branches:
   except:
-    - legacy
-
+  - legacy
 deploy:
-    provider: pypi
-    user: windreamer
-    password:
-        secure: Qo9ucolE2ajQSbgifbqzfDYD5J09FgYEntXpak1ffPUWxJyeR6H2/uChCGqXC3+ZEkTpzc/MHshHQRRymtPZeHn5etnSHzshWu8njBVLr4I7ft2d5dNGJDxfK2j79HPVnib1MoPNC8kiqP05QD+hyMMQNZDFCHwG1D5bnWNhZYI=
-    on:
-        tags: true
-        repo: douban/greenify
+  provider: pypi
+  user: windreamer
+  password:
+    secure: RITBiQqqC2dxKzFfhYeVkr9ZQGIaHV+sQifZKCAfNcbBKoh10ea37ZyF5JiGxeHf7v+gtPOa9ksO8PNwmZADLUln+qC1vO4LgSWB8P1GPPYabIKDDJB3Rvzv/cDDOlNPzcdIMb0L4STDFlI2NS5Q+STF0rJp0g0YrzrVCinBfSY=
+  on:
+    tags: true
+    repo: douban/greenify

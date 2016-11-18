@@ -1,23 +1,26 @@
 language: python
-python:
-- 2.7
-- 3.5
+python: 3.5
+services: docker
+sudo: required
+cache:
+  bundler: true
+  directories:
+      - $HOME/.cache/pip
+      - $HOME/docker
+env:
+  - TOX_ENV=py35 PYENV=cp35
+    DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+  - TOX_ENV=py27 PYENV=cp27
+    DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
 install:
-- pip install -U pip setuptools
-- pip install Cython
-- pip install gevent
-before_script:
-- python setup.py install
+  - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
+  - docker pull $DOCKER_IMAGE
+  - pip install -U pip setuptools
+  - pip install Cython tox
 script:
-- cd tests/http_head
-- python fake_slow_http_server.py&
-- pid=$!
-- python setup.py build_ext --inplace
-- python test.py
-- kill $pid
-branches:
-  except:
-  - legacy
+  - tox -e $TOX_ENV && docker run --rm -v `pwd`:/io $DOCKER_IMAGE /io/.travis/build-wheels.sh greenify $PYENV
+before_cache:
+  - mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 deploy:
   provider: pypi
   user: windreamer

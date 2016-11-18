@@ -2,7 +2,7 @@ import sys
 from glob import glob
 from setuptools import setup, Extension
 
-version = '0.3.1'
+version = '0.3.2'
 
 def readme():
     with open('README.rst') as f:

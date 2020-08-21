@@ -56,7 +56,7 @@ def sleeper():
 def main():
     global stack
     local_addr = ("localhost", str(fake_slow_http_server.PORT))
-    test_sites = (local_addr, ("msn.com", "80"), ("taobao.com", "80"),
+    test_sites = (local_addr, ("google.com", "80"), ("twitter.com", "80"),
                   ("douban.com", "80"), ("github.com", "80"))
     for fn in [python_http_head_check, c_http_head_check]:
         stack = []

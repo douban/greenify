@@ -13,8 +13,9 @@ cache:
       - $HOME/.cache/pip
       - $HOME/docker
 env:
-  - DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-    PLAT=manylinux2010_x86_64
+  global:
+    - DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+    - PLAT=manylinux2010_x86_64
 jobs:
   include:
     - env: TOX_ENV=py27 PYENV=cp27

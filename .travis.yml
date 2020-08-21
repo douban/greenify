@@ -1,5 +1,10 @@
 language: python
-python: 3.5
+python:
+  - '2.7'
+  - '3.5'
+  - '3.6'
+  - '3.7'
+  - '3.8'
 services: docker
 sudo: required
 cache:
@@ -8,23 +13,27 @@ cache:
       - $HOME/.cache/pip
       - $HOME/docker
 env:
-  - TOX_ENV=py38 PYENV=cp38
-    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-  - TOX_ENV=py37 PYENV=cp37
-    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-  - TOX_ENV=py36 PYENV=cp36
-    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-  - TOX_ENV=py35 PYENV=cp35
-    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
-  - TOX_ENV=py27 PYENV=cp27
-    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+  - DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+    PLAT=manylinux2010_x86_64
+jobs:
+  include:
+    - env: TOX_ENV=py27 PYENV=cp27
+      python: '2.7'
+    - env: TOX_ENV=py35 PYENV=cp35
+      python: '3.5'
+    - env: TOX_ENV=py36 PYENV=cp36
+      python: '3.6'
+    - env: TOX_ENV=py37 PYENV=cp37
+      python: '3.7'
+    - env: TOX_ENV=py38 PYENV=cp38
+      python: '3.8'
 install:
   - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - docker pull $DOCKER_IMAGE
   - pip install -U pip setuptools
   - pip install Cython tox
 script:
-  - tox -e $TOX_ENV && mkdir dist && docker run --rm -v `pwd`:/io $DOCKER_IMAGE /io/.travis/build-wheels.sh greenify $PYENV
+  - tox -e $TOX_ENV && mkdir dist && docker run --rm -e PLAT=$PLAT -v `pwd`:/io $DOCKER_IMAGE /io/.travis/build-wheels.sh greenify $PYENV
 before_cache:
   - mkdir -p $HOME/docker  && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 deploy:

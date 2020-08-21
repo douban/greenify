@@ -8,10 +8,16 @@ cache:
       - $HOME/.cache/pip
       - $HOME/docker
 env:
+  - TOX_ENV=py38 PYENV=cp38
+    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+  - TOX_ENV=py37 PYENV=cp37
+    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+  - TOX_ENV=py36 PYENV=cp36
+    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
   - TOX_ENV=py35 PYENV=cp35
-    DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
   - TOX_ENV=py27 PYENV=cp27
-    DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+    DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
 install:
   - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - docker pull $DOCKER_IMAGE

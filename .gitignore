@@ -13,3 +13,4 @@ dist/
 venv/
 *.egg-info/
 *.egg
+.tox/

@@ -14,5 +14,5 @@ done
 
 # Bundle external shared libraries into the wheels
 for whl in wheelhouse/${PACKAGE}*.whl; do
-    auditwheel repair $whl -w /io/dist/
+    auditwheel repair $whl --plat $PLAT -w /io/dist/
 done

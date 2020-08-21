@@ -1,7 +1,7 @@
 from glob import glob
 from setuptools import setup, Extension
 
-version = '0.3.3'
+version = '0.3.4'
 
 
 def readme():

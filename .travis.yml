@@ -25,6 +25,8 @@ before_cache:
   - mkdir -p $HOME/docker  && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}' | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 deploy:
   provider: pypi
+  skip_cleanup: true
+  skip_existing: true
   user: windreamer
   password:
     secure: RITBiQqqC2dxKzFfhYeVkr9ZQGIaHV+sQifZKCAfNcbBKoh10ea37ZyF5JiGxeHf7v+gtPOa9ksO8PNwmZADLUln+qC1vO4LgSWB8P1GPPYabIKDDJB3Rvzv/cDDOlNPzcdIMb0L4STDFlI2NS5Q+STF0rJp0g0YrzrVCinBfSY=

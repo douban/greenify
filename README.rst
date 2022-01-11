@@ -1,22 +1,17 @@
 greenify_
 =========
 
+|build| |status| |pypiv| |pyversions| |wheel| |license|
+
 greenify_ can make Python extension modules having network operations in C
 code to be compatible with gevent_.
 
-greenify_ uses the Dynamic Function Redirecting technique same as ELF-Hook_ 
+greenify_ uses the Dynamic Function Redirecting technique same as ELF-Hook_
 to patch blocking network operations at runtime, without the need modify
 the original modules.
 
 Currently greenify_ only supports ELF format modules, and is tested on Linux.
 
-Build status
-------------
-
-- Branch **master** : |travis_master|
-
-.. |travis_master| image:: https://travis-ci.org/douban/greenify.svg?branch=master
-    :target: https://travis-ci.org/douban/greenify
 
 Install from source
 -------------------
@@ -64,3 +59,14 @@ greenify_ is written and maintained by `douban`_ and is licensed under New BSD l
 .. _greenify: https://github.com/douban/greenify
 .. _douban: http://www.douban.com
 .. _ELF-Hook: https://github.com/shoumikhin/ELF-Hook
+
+.. |build| image:: https://github.com/douban/greenify/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/douban/greenify/actions/workflows/test.yml
+
+.. |pypiv| image:: https://img.shields.io/pypi/v/greenify
+   :target: https://pypi.org/project/greenify/
+
+.. |status| image:: https://img.shields.io/pypi/status/greenify
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/greenify
+.. |wheel| image:: https://img.shields.io/pypi/wheel/greenify
+.. |license| image:: https://img.shields.io/pypi/l/greenify?color=blue

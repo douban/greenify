@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import time
+
 try:
     from SimpleHTTPServer import SimpleHTTPRequestHandler
     from SocketServer import TCPServer
@@ -18,15 +19,14 @@ class Server(TCPServer):
 
 
 class Handler(SimpleHTTPRequestHandler):
-
     def do_HEAD(self):
         time.sleep(BLOCKING_SECONDS)
         return SimpleHTTPRequestHandler.do_HEAD(self)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     httpd = Server(("", PORT), Handler)
     try:
         httpd.serve_forever()
-    except:
+    except Exception:
         httpd.server_close()

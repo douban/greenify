@@ -1,4 +1,4 @@
-name: Test
+name: test
 
 on:
   push:
@@ -14,6 +14,7 @@ jobs:
         pyver: ["2.7", "3.6", "3.7", "3.8", "3.9", "3.10"]
 
     steps:
+    - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -25,4 +26,5 @@ jobs:
 
     - name: Run unittest
       run: |
-        tox -e ${{ matrix.pyver }}
+        version=${{ matrix.pyver }}
+        tox -e py${version/./}

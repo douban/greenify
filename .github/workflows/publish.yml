@@ -1,4 +1,4 @@
-name: Publish
+name: publish
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     - name: Build a source tarball
       run: python setup.py sdist
     - name: Build wheels
-      uses: RalfG/python-wheels-manylinux-build@v0.3.4-manylinux1_x86_64
+      uses: RalfG/python-wheels-manylinux-build@v0.4.2-manylinux2014_x86_64
       with:
         python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
         build-requirements: 'cython'

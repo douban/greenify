@@ -1,0 +1,28 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pyver: ["2.7", "3.6", "3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.pyver }}
+    - name: Install python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install Cython tox
+
+    - name: Run unittest
+      run: |
+        tox -e ${{ matrix.pyver }}

@@ -6,4 +6,4 @@ python fake_slow_http_server.py&
 pid=$!
 pip install .
 python test.py
-kill $pid
+kill $pid || true

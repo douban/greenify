@@ -1,7 +1,7 @@
 from glob import glob
 from setuptools import setup, Extension
 
-version = "0.3.4"
+version = "0.4.0"
 
 
 def readme():
@@ -24,7 +24,6 @@ setup(
         "Operating System :: POSIX :: Linux",
         "Programming Language :: C",
         "Programming Language :: Cython",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",

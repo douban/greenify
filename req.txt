@@ -1,2 +1,2 @@
-cython >= 0.18
+cython >= 0.18, < 3
 gevent

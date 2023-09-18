@@ -1,7 +1,7 @@
 from glob import glob
 from setuptools import setup, Extension
 
-version = "0.4.0"
+version = "0.4.1"
 
 
 def readme():
@@ -41,7 +41,7 @@ setup(
     author_email="tianzhongbo@douban.com",
     url="https://github.com/douban/greenify",
     download_url="https://github.com/douban/greenify/archive/%s.tar.gz" % version,
-    setup_requires=["Cython >= 0.18"],
+    setup_requires=["Cython >= 0.18, < 3"],
     install_requires=["gevent"],
     ext_modules=[
         Extension(

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pyver: ["2.7", "3.6", "3.7", "3.8", "3.9", "3.10"]
+        pyver: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
     - uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
     - name: Install python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install Cython tox
+        pip install 'Cython<3' 'tox<4'
 
     - name: Run unittest
       run: |

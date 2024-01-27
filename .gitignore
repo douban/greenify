@@ -14,3 +14,5 @@ venv/
 *.egg-info/
 *.egg
 .tox/
+.eggs
+/cython_debug

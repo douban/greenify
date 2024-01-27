@@ -2,6 +2,7 @@
 
 #include "hook.h"
 #include "libgreenify.h"
+#include "cond_var.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -25,6 +26,8 @@ typedef enum
     FN_SENDTO,
     FN_SELECT,
     FN_POLL,
+    FN_WAIT,
+    FN_NOTIFY,
 } greenified_function_t;
 
 void* greenify_patch_lib(const char* library_filename, greenified_function_t fn);

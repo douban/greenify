@@ -95,7 +95,7 @@ cdef void async_callback(void *async_) noexcept with gil:
     # ref.send()
     # wait([ref])
     # get_hub().loop.run_callback_threaded(wait, [ref])
-    Py_DECREF(ref)
+    # Py_DECREF(ref)
 
 cpdef patch_lib(library_path):
     cdef char* path

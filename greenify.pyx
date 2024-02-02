@@ -10,7 +10,7 @@ cdef extern from "libgreenify.h":
     cdef void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 
 cdef extern from "cond_var.h":
-    cdef void greenify_set_async_(void *(*factory)(), void (*callback)(void *))
+    cdef void greenify_set_async_(int (*factory)(), void (*callback)(int))
     const int async_hook
 
 cdef extern from "hook_greenify.h":
@@ -83,19 +83,21 @@ def wait(watchers):
         for watcher in watchers:
             watcher.stop()
 
-cdef void * async_factory() noexcept with gil:
-    ref = get_hub().loop.async_()
-    Py_INCREF(ref)
-    return <void *> <PyObject *> ref
+asyncs = {}
 
-cdef void async_callback(void *async_) noexcept with gil:
-    ref = <object> async_
+cdef int async_factory() noexcept with gil:
+    ref = get_hub().loop.async_()
+    key = id(ref)
+    asyncs[key] = ref
+    return id
+
+cdef void async_callback(int async_) noexcept with gil:
+    ref = asyncs.pop(async_)
     get_hub().loop.run_callback_threaded(ref.send)
     # get_hub().loop.run_callback(ref.send)
     # ref.send()
     # wait([ref])
     # get_hub().loop.run_callback_threaded(wait, [ref])
-    # Py_DECREF(ref)
 
 cpdef patch_lib(library_path):
     cdef char* path

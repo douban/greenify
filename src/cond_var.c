@@ -19,7 +19,7 @@ const char* ref_symbol(void *ref) {
     return res.dli_sname;
 }
 
-std::unordered_map<std::condition_variable*, std::queue<void *>> waiters;
+std::unordered_map<std::condition_variable*, std::queue<int>> waiters;
 
 void green_wait(std::condition_variable *const self, std::unique_lock<std::mutex> &lock) {
     waiters[self].push(async_factory());

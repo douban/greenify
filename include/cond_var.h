@@ -15,7 +15,7 @@ void green_notify(std::condition_variable *const self);
 const int async_hook = 0;
 #endif
 
-void greenify_set_async_(void *(*factory)(), void (*callback)(void *));
+typedef int (*async_factory_t)();
+typedef void (*async_callback_t)(int);
 
-typedef void *(*async_factory_t)();
-typedef void (*async_callback_t)(void *);
+void greenify_set_async_(async_factory_t, async_callback_t);

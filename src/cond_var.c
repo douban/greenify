@@ -1,14 +1,13 @@
-#include "cond_var.h"
+long (*async_factory)();
+void (*async_callback)(long);
 
-async_factory_t async_factory;
-async_callback_t async_callback;
-
-void greenify_set_async_(async_factory_t factory, async_callback_t callback) {
+void greenify_set_async_(long (*factory)(), void (*callback)(long)) {
     async_factory = factory;
     async_callback = callback;
 }
 
 #ifdef __cplusplus
+#include <condition_variable>
 #include <dlfcn.h>
 #include <unordered_map>
 #include <queue>
@@ -19,7 +18,7 @@ const char* ref_symbol(void *ref) {
     return res.dli_sname;
 }
 
-std::unordered_map<std::condition_variable*, std::queue<int>> waiters;
+std::unordered_map<std::condition_variable*, std::queue<long>> waiters;
 
 void green_wait(std::condition_variable *const self, std::unique_lock<std::mutex> &lock) {
     waiters[self].push(async_factory());

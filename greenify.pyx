@@ -1,6 +1,7 @@
 from gevent.hub import get_hub, getcurrent, Waiter
 from gevent.timeout import Timeout
 from cpython cimport Py_INCREF, Py_DECREF, PyObject
+# import gevent.util
 
 cdef extern from "libgreenify.h":
     struct greenify_watcher:
@@ -10,8 +11,8 @@ cdef extern from "libgreenify.h":
     cdef void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 
 cdef extern from "cond_var.h":
-    cdef void greenify_set_async_(int (*factory)(), void (*callback)(int))
-    const int async_hook
+    cdef void greenify_set_async_(long (*factory)(), void (*callback)(long))
+    long async_hook
 
 cdef extern from "hook_greenify.h":
 
@@ -85,15 +86,18 @@ def wait(watchers):
 
 asyncs = {}
 
-cdef int async_factory() noexcept with gil:
+cdef long async_factory() noexcept with gil:
+    # gevent.util.print_run_info()
     ref = get_hub().loop.async_()
     key = id(ref)
+    print(1, key)
     asyncs[key] = ref
-    return id
+    return key
 
-cdef void async_callback(int async_) noexcept with gil:
+cdef void async_callback(long async_) noexcept with gil:
+    print(2, async_)
     ref = asyncs.pop(async_)
-    get_hub().loop.run_callback_threaded(ref.send)
+    # get_hub().loop.run_callback_threadsafe(ref.send)
     # get_hub().loop.run_callback(ref.send)
     # ref.send()
     # wait([ref])

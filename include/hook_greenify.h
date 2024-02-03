@@ -2,9 +2,10 @@
 
 #include "hook.h"
 #include "libgreenify.h"
-#include "cond_var.h"
 
 #ifdef __cplusplus
+#include "cond_var.h"
+
 extern "C"
 {
 #endif

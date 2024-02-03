@@ -11,7 +11,7 @@ cdef extern from "libgreenify.h":
     cdef void greenify_set_wait_callback(greenify_wait_callback_func_t callback)
 
 cdef extern from "cond_var.h":
-    cdef void greenify_set_async_(long (*factory)(), void (*callback)(long))
+    cdef void greenify_set_async_(long (*factory)(), void (*waiter)(long), void (*callback)(long))
     long async_hook
 
 cdef extern from "hook_greenify.h":
@@ -42,6 +42,7 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
     cdef float timeout_in_s
     cdef int i
 
+    # gevent.util.print_run_info()
     hub = get_hub()
     watchers_list = []
     for i in range(nwatchers):
@@ -59,14 +60,14 @@ cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_m
         except Timeout:
             return -1
         finally:
-            t.cancel()
+            t.close()
     else:
         wait(watchers_list)
         return 0
 
 def greenify():
     greenify_set_wait_callback(wait_gevent)
-    greenify_set_async_(async_factory, async_callback)
+    greenify_set_async_(async_factory, async_waiter, async_callback)
 
 def wait(watchers):
     waiter = Waiter()
@@ -87,17 +88,21 @@ def wait(watchers):
 asyncs = {}
 
 cdef long async_factory() noexcept with gil:
-    # gevent.util.print_run_info()
-    ref = get_hub().loop.async_()
+    ref = Waiter()
     key = id(ref)
-    print(1, key)
     asyncs[key] = ref
     return key
 
+cdef void async_waiter(long async_) noexcept with gil:
+    waiter = asyncs.get(async_, None)
+    if waiter:
+        result = waiter.get()
+        assert result == async_, "invalid switch"
+        waiter.clear()
+
 cdef void async_callback(long async_) noexcept with gil:
-    print(2, async_)
     ref = asyncs.pop(async_)
-    # get_hub().loop.run_callback_threadsafe(ref.send)
+    get_hub().loop.run_callback_threadsafe(ref.switch, async_)
     # get_hub().loop.run_callback(ref.send)
     # ref.send()
     # wait([ref])

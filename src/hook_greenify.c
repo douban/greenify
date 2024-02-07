@@ -38,6 +38,12 @@ void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
         case FN_POLL:
             return _GREENIFY_PATCH_EXPAND(library_filename, poll);
 #endif
+#ifdef __cplusplus
+        case FN_WAIT:
+            return hook(library_filename, wait_sym(), (void *) &green_wait);
+        case FN_NOTIFY:
+            return hook(library_filename, notify_sym(), (void *) &green_notify);
+#endif
         default:
             return NULL;
     }

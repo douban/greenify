@@ -29,7 +29,7 @@ cdef extern from "hook_greenify.h":
 
     void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
 
-cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) with gil:
+cdef int wait_gevent(greenify_watcher* watchers, int nwatchers, int timeout_in_ms) noexcept with gil:
     cdef int fd, event
     cdef float timeout_in_s
     cdef int i

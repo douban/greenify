@@ -26,6 +26,9 @@ cdef extern from "hook_greenify.h":
         FN_SENDTO
         FN_SELECT
         FN_POLL
+        FN_SLEEP
+        FN_USLEEP
+        FN_NANOSLEEP
 
     void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
 
@@ -75,16 +78,19 @@ def wait(watchers):
         for watcher in watchers:
             watcher.stop()
 
-cpdef patch_lib(library_path):
+cpdef patch_lib(library_path, patch_sleep=False):
     cdef char* path
     if isinstance(library_path, unicode):
         library_path = (<unicode>library_path).encode('utf8')
 
     path = library_path
     cdef bint result = False
-    for fn in (FN_CONNECT, FN_READ, FN_WRITE, FN_PREAD, FN_PWRITE, FN_READV,
+    fn_set = [FN_CONNECT, FN_READ, FN_WRITE, FN_PREAD, FN_PWRITE, FN_READV,
                FN_WRITEV, FN_RECV, FN_SEND, FN_RECVMSG, FN_SENDMSG,
-               FN_RECVFROM, FN_SENDTO, FN_SELECT, FN_POLL):
+               FN_RECVFROM, FN_SENDTO, FN_SELECT, FN_POLL]
+    if patch_sleep:
+        fn_set.extend((FN_SLEEP, FN_USLEEP, FN_NANOSLEEP))
+    for fn in fn_set:
         if NULL != greenify_patch_lib(path, fn):
             result = True
 

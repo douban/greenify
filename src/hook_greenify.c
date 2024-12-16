@@ -38,6 +38,12 @@ void* greenify_patch_lib(const char* library_filename, greenified_function_t fn)
         case FN_POLL:
             return _GREENIFY_PATCH_EXPAND(library_filename, poll);
 #endif
+        case FN_SLEEP:
+            return _GREENIFY_PATCH_EXPAND(library_filename, sleep);
+        case FN_USLEEP:
+            return _GREENIFY_PATCH_EXPAND(library_filename, usleep);
+        case FN_NANOSLEEP:
+            return _GREENIFY_PATCH_EXPAND(library_filename, nanosleep);
         default:
             return NULL;
     }

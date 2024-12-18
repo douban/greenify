@@ -25,6 +25,9 @@ typedef enum
     FN_SENDTO,
     FN_SELECT,
     FN_POLL,
+    FN_SLEEP,
+    FN_USLEEP,
+    FN_NANOSLEEP,
 } greenified_function_t;
 
 void* greenify_patch_lib(const char* library_filename, greenified_function_t fn);

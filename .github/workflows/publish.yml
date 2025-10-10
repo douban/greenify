@@ -11,16 +11,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Build a source tarball
       run: python setup.py sdist
     - name: Build wheels
       uses: RalfG/python-wheels-manylinux-build@v0.4.2-manylinux2014_x86_64
       with:
-        python-versions: 'cp39-cp39 cp310-cp310 cp311-cp311 cp312-cp312 cp313-cp313'
+        python-versions: 'cp39-cp39 cp310-cp310 cp311-cp311 cp312-cp312 cp313-cp313 cp314-cp314'
         build-requirements: 'cython'
     - name: Clean linux_x86_64.whl
       run: rm dist/*-linux_x86_64.whl

@@ -36,6 +36,9 @@ int green_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 #ifndef NO_POLL
 int green_poll(struct pollfd *fds, nfds_t nfds, int timeout);
 #endif
+unsigned int green_sleep(unsigned int seconds);
+int green_usleep(useconds_t usec);
+int green_nanosleep(const struct timespec *duration, struct timespec *rem);
 
 struct greenify_watcher {
 	int fd;

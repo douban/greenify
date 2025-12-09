@@ -1,12 +1,9 @@
 name: publish
 
-on:
-  push:
-    tags:
-      - v*
+on: [push]
 
 jobs:
-  pypi:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,18 +12,80 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - name: Install python dependencies
+      run: pip install Cython auditwheel
     - name: Build a source tarball
       run: python setup.py sdist
-    - name: Build wheels
-      uses: RalfG/python-wheels-manylinux-build@v0.4.2-manylinux2014_x86_64
-      with:
-        python-versions: 'cp39-cp39 cp310-cp310 cp311-cp311 cp312-cp312 cp313-cp313 cp314-cp314'
-        build-requirements: 'cython'
-    - name: Clean linux_x86_64.whl
-      run: rm dist/*-linux_x86_64.whl
+    - name: Build Wheel
+      run: python setup.py bdist_wheel --py-limited-api=cp39
+    - name: Repair Wheel
+      run: find dist -name *.whl -print -exec auditwheel repair {} \;
+    - name: Clean Non Audited Wheel
+      run: rm -v dist/*-linux_x86_64.whl
     - name: Check build result
-      run: ls -lh dist/
+      run: |
+        ls -lh dist
+        find dist -name *.tar.gz -print -exec tar -ztvf {} \;
+        ls -lh wheelhouse
+        find wheelhouse -name *.whl -print -exec unzip -l {} \;
+    - uses: actions/upload-artifact@v4
+      with:
+        name: wheel
+        path: wheelhouse/*.whl
+    - uses: actions/upload-artifact@v4
+      with:
+        name: sdist
+        path: dist/*.tar.gz
+
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pyver: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # only checkout files for test
+        sparse-checkout: |
+          tests
+          misc/test.sh
+    - uses: actions/download-artifact@v4
+      with:
+        name: wheel
+        path: wheel
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.pyver }}
+    - name: Install python dependencies
+      run: |
+        pip install gevent
+        pip install wheel/*.whl
+    - name: Run test
+      run: misc/test.sh
+
+  pypi:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: wheel
+        path: dist
+    - uses: actions/download-artifact@v4
+      with:
+        name: sdist
+        path: dist
+    - name: dump result
+      run: |
+        ls -lh dist
+        find dist -name *.whl -print -exec unzip -l {} \;
+        find dist -name *.tar.gz -print -exec tar -ztvf {} \;
     - name: Publish to PyPI
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip_existing: true

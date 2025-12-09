@@ -1,12 +1,22 @@
 from glob import glob
 from setuptools import setup, Extension
 
-version = "0.4.4"
+version = "0.5.0"
 
 
 def readme():
     with open("README.rst") as f:
         return f.read()
+
+
+def make_limited_api_macro(version):
+    s = 0
+    step = 8
+    pos = step * 3
+    for i in version.split("."):
+        s += int(i) << pos
+        pos -= step
+    return s
 
 
 include_dirs = ["include"]
@@ -50,6 +60,10 @@ setup(
             sources,
             include_dirs=include_dirs,
             libraries=libraries,
+            define_macros=[
+                ("Py_LIMITED_API", make_limited_api_macro("3.9")),
+            ],
+            py_limited_api=True,
         )
     ],
 )

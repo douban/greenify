@@ -35,6 +35,17 @@ Usage
 2. Make sure the dynamic module(e.g. libmemcached) is patched before using::
 
     assert greenify.patch_lib('/usr/lib/libmemcached.so')
+   
+   By default greenify will patch these blocking operations:
+- socket `connect()`
+- socket io, etc. `read()`/`write()`/`recvfrom()`/`sendto()` and their families
+- io multiplexing, `select()` and `poll()` if available
+
+  If you also need `sleep()`/`usleep()`/`nanosleep()` calls to be patched, pass `patch_sleep=True` to `greenify.patch_lib()`::
+
+    assert greenify.patch_lib('/usr/lib/libmemcached.so', patch_sleep=True)
+
+  Note: currently patched `sleep()` calls cannot be interrupted by signals.
 
 3. Import and use the corresponding module, which is now gevent_ compatible.
 

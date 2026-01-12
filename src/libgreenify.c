@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <time.h>
+#include <sys/timerfd.h>
 
 #ifdef DEBUG
 #include <unistd.h>
@@ -285,3 +286,63 @@ green_poll(struct pollfd *fds, nfds_t nfds, int timeout)
     return poll(fds, nfds, 0);
 }
 #endif
+
+
+#define handle_error(msg) \
+        do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
+
+unsigned int green_sleep_impl(unsigned int seconds, unsigned int nanoseconds){
+    debug("Enter green_sleep_impl\n");
+    int fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (fd == -1)
+        handle_error("timerfd create error");
+
+    struct itimerspec new_value;
+    new_value.it_interval.tv_sec = 0;
+    new_value.it_interval.tv_nsec = 0;
+
+    new_value.it_value.tv_sec = seconds;
+    new_value.it_value.tv_nsec = nanoseconds;
+
+    if (timerfd_settime(fd, 0, &new_value, NULL) == -1)
+        handle_error("timerfd settime error");
+
+    callback_single_watcher(fd, EVENT_READ, 0);
+
+    close(fd);
+
+    return 0;
+}
+
+unsigned int green_sleep(unsigned int seconds){
+    return green_sleep_impl(seconds, 0);
+}
+
+int green_usleep(useconds_t usec) {
+    unsigned int seconds = usec / 1000 / 1000;
+    unsigned int nanoseconds = usec % (1000 * 1000) * 1000;
+    return green_sleep_impl(seconds, nanoseconds);
+}
+
+int green_nanosleep(const struct timespec *duration, struct timespec *rem) {
+    debug("Enter green_nanosleep\n"); \
+    int fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (fd == -1)
+        handle_error("timerfd create error");
+
+    struct itimerspec new_value;
+    new_value.it_interval.tv_sec = 0;
+    new_value.it_interval.tv_nsec = 0;
+
+    new_value.it_value = *duration;
+
+    if (timerfd_settime(fd, 0, &new_value, NULL) == -1)
+        handle_error("timerfd settime error");
+
+    callback_single_watcher(fd, EVENT_READ, 0);
+
+    close(fd);
+
+    return 0;
+}
